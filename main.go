@@ -23,6 +23,7 @@ func main() {
 
 		if r.Header.Get("Content-Type") != "msgpack" {
 			http.Error(w, "Invalid Content-Type: "+r.Header.Get("Content-Type"), http.StatusBadRequest)
+			return
 		}
 
 		defer r.Body.Close()
@@ -34,7 +35,6 @@ func main() {
 		}
 
 		fmt.Printf("msg: [%+v]", out)
-		w.WriteHeader(http.StatusNoContent)
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
