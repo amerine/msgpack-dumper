@@ -21,7 +21,7 @@ func main() {
 			return
 		}
 
-		if r.Header.Get("Content-Type") != "msgpack" {
+		if r.Header.Get("Content-Type") != "application/msgpack" {
 			fmt.Println("Unsupported Content-Type Header: " + r.Header.Get("Content-Type"))
 			http.Error(w, "Invalid Content-Type: "+r.Header.Get("Content-Type"), http.StatusBadRequest)
 			return
