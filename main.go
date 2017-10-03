@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/vmihailenco/msgpack"
 )
 
 func main() {
@@ -27,15 +27,30 @@ func main() {
 			return
 		}
 
-		defer r.Body.Close()
-		dec := msgpack.NewDecoder(r.Body)
-
-		out, err := dec.DecodeMap()
+		buf, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Invalid Payload", http.StatusBadRequest)
+			http.Error(w, "error: "+err.Error(), http.StatusBadRequest)
+			return
 		}
+		defer r.Body.Close()
 
-		fmt.Printf("msg: [%+v]", out)
+		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
+		dec := NewDecoder(rdr)
+
+		count := 0
+		for {
+			ret, ts, record := GetRecord(dec)
+			if ret != 0 {
+				break
+			}
+
+			timestamp := ts.(FLBTime)
+			fmt.Printf("[%d] %s: [%s, {", count, "empty", timestamp.String())
+			for k, v := range record {
+				fmt.Printf("\"%s\": %v, ", k, v)
+			}
+			fmt.Printf("}]\n")
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))

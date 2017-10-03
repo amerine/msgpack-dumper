@@ -1,9 +1,10 @@
 FROM alpine:latest
 
-MAINTAINER Mark Turner <mark@amerine.net>
+LABEL maintainer="mark@amerine.net"
 
-WORKDIR "/opt"
+RUN mkdir -p /app
+WORKDIR "/app"
 
-ADD .docker_build/msgpack-dumper /opt/bin/msgpack-dumper
+ADD .docker_build/msgpack-dumper /app/msgpack-dumper
 
-CMD ["/opt/bin/msgpack-dumper"]
+CMD ["/app/msgpack-dumper"]
