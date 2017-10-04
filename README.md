@@ -1,3 +1,3 @@
 # msgpack-dumper
 
-Converts msgpack posts to log lines for inspection
+Converts fluent-bit msgpack posts to log lines for inspection
