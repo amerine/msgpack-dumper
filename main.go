@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/amerine/msgpack-dumper/decoder"
 )
 
 func main() {
@@ -35,16 +37,16 @@ func main() {
 		defer r.Body.Close()
 
 		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
-		dec := NewDecoder(rdr)
+		dec := decoder.NewDecoder(rdr)
 
 		count := 0
 		for {
-			ret, ts, record := GetRecord(dec)
+			ret, ts, record := decoder.GetRecord(dec)
 			if ret != 0 {
 				break
 			}
 
-			timestamp := ts.(FLBTime)
+			timestamp := ts.(decoder.FLBTime)
 			fmt.Printf("[%d] %s: [%s, {", count, "empty", timestamp.String())
 			for k, v := range record {
 				fmt.Printf("\"%s\": %v, ", k, v)
