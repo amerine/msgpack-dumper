@@ -29,7 +29,10 @@ func (f FLBTime) WriteExt(interface{}) []byte {
 func (f FLBTime) ReadExt(i interface{}, b []byte) {
 	out := i.(*FLBTime)
 	sec := binary.BigEndian.Uint32(b)
-	usec := binary.BigEndian.Uint32(b[4:])
+	// TODO(mt): This is really weird, but the data looks... interesting. See https://gist.github.com/amerine/322f9c368f9fc0e9dc8d74f2e6b59bcf
+	// usec := binary.BigEndian.Uint32(b[4:])
+	usec := binary.LittleEndian.Uint32(b[4:])
+
 	out.Time = time.Unix(int64(sec), int64(usec))
 }
 
@@ -64,9 +67,11 @@ func GetRecord(dec *FBitDecoder) (ret int, ts interface{}, rec map[interface{}]i
 		return -1, 0, nil
 	}
 
-	// fmt.Printf("record: [string: %s] [byte: %+v]", m, m)
-
 	slice := reflect.ValueOf(m)
+	if slice.Kind() != reflect.Slice {
+		// Not a fluent-bit message
+		return -1, 0, nil
+	}
 	t := slice.Index(0).Interface()
 	data := slice.Index(1)
 
