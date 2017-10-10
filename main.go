@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/amerine/msgpack-dumper/decoder"
 )
@@ -30,30 +28,24 @@ func main() {
 			return
 		}
 
-		buf, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "error: "+err.Error(), http.StatusBadRequest)
-			return
-		}
+		dec := decoder.NewDecoder(r.Body)
 		defer r.Body.Close()
 
-		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
-		dec := decoder.NewDecoder(rdr)
-
-		count := 0
 		for {
-			ret, _, record := decoder.GetRecord(dec)
-			if ret != 0 {
+			record, err := dec.GetRecord()
+			if err == io.EOF {
 				break
 			}
-
-			timestamp := time.Now()
-			fmt.Printf("[%d] %s: [%s, {", count, "empty", timestamp.String())
-			for k, v := range record {
-				fmt.Printf("\"%s\": %v, ", k, v)
+			if err != nil {
+				fmt.Println("Error Processing Record: " + err.Error())
+				continue
 			}
-			fmt.Printf("}]\n")
+
+			fmt.Printf("\"record\": %q, ", record)
 		}
+
+		fmt.Println("Processed line")
+
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))

@@ -24,3 +24,7 @@
 [[constraint]]
   branch = "api-0.12"
   name = "github.com/fluent/fluent-bit-go"
+
+[[constraint]]
+  name = "github.com/vmihailenco/msgpack"
+  version = "3.1.2"
