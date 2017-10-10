@@ -23,6 +23,18 @@ func main() {
 			return
 		}
 
+		if r.Header.Get("Content-Type") == "application/json" {
+			buf, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "error: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			defer r.Body.Close()
+
+			fmt.Printf("json: %s\n", buf)
+			return
+		}
+
 		if r.Header.Get("Content-Type") != "application/msgpack" {
 			fmt.Println("Unsupported Content-Type Header: " + r.Header.Get("Content-Type"))
 			http.Error(w, "Invalid Content-Type: "+r.Header.Get("Content-Type"), http.StatusBadRequest)
