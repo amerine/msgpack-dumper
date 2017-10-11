@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"reflect"
 	"time"
 
 	"github.com/vmihailenco/msgpack"
@@ -62,4 +63,27 @@ func (dec *FBitDecoder) GetRecord() (interface{}, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+// ExtractTime returns the FBTime of the current record.
+func ExtractTime(d interface{}) (FBTime, error) {
+	slice := reflect.ValueOf(d)
+	if slice.Kind() != reflect.Slice {
+		return FBTime{}, errors.New("Unknown Data")
+	}
+
+	t := slice.Index(0).Interface()
+
+	return t.(FBTime), nil
+}
+
+// ExtractData returns a map[string]interface{} of the record data.
+func ExtractData(d interface{}) (map[string]interface{}, error) {
+	slice := reflect.ValueOf(d)
+	if slice.Kind() != reflect.Slice {
+		return nil, errors.New("Unknown Data")
+	}
+
+	t := slice.Index(1).Interface()
+	return t.(map[string]interface{}), nil
 }
