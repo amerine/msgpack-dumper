@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"runtime"
 	"time"
 
 	"github.com/vmihailenco/msgpack"
@@ -31,8 +32,13 @@ func (fb *FBTime) UnmarshalMsgpack(b []byte) error {
 		return errors.New("Invalid timestamp data")
 	}
 
+	var usec uint32
 	sec := binary.BigEndian.Uint32(b)
-	usec := binary.BigEndian.Uint32(b[4:])
+	if runtime.GOOS == "darwin" {
+		usec = binary.LittleEndian.Uint32(b[4:])
+	} else {
+		usec = binary.BigEndian.Uint32(b[4:])
+	}
 	fb.Time = time.Unix(int64(sec), int64(usec))
 	return nil
 }
